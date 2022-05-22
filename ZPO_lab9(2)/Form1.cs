@@ -12,8 +12,7 @@ using System.Windows.Forms;
 namespace ZPO_lab9_2_
 {
     public partial class Form1 : Form
-    {
-        List<Task<string>> taskList = new List<Task<string>>();
+    {               
 
         public Form1()
         {
@@ -27,32 +26,33 @@ namespace ZPO_lab9_2_
 
         private void button3_Click(object sender, EventArgs e)
         {
-            listLinks.Items.Clear();
+            listLinks.Items.Clear();                      
         }
 
         //Download
-        private async void Button2_Click(object sender, EventArgs e)
-        {
-            Parallel.For(0, listLinks.Items.Count, i =>
-            {
-                taskList.Add(download(listLinks.Items[i].ToString()));
-            });                        
-
-            foreach(Task<string> task in taskList)
-            {
-                MessageBox.Show(task.Result);
-                
-            }
-            
+        private void Button2_Click(object sender, EventArgs e)
+        {        
+            List<Task<string>> tasks = new List<Task<string>>();
+            Parallel.For(0, listLinks.Items.Count, i => tasks.Add(download(listLinks.Items[i].ToString())));
         }
+
+        List<string> completedLink = new List<string>();
 
         public async Task<string> download(string link)
         {
             using(HttpClient client = new HttpClient())
             {
-                string res = await client.GetStringAsync(link);
-                return res;
+                string result = await client.GetStringAsync(link);
+                MessageBox.Show($"{link} is done", "Progress");
+                System.Diagnostics.Debug.WriteLine(link);
+                completedLink.Add(result);             
+                return result;                
             }
+        }        
+
+        private void listLinks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine(completedLink[listLinks.SelectedIndex]);
         }
     }
 }
